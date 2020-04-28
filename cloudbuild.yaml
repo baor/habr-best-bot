@@ -1,7 +1,5 @@
 steps:
 - name: 'gcr.io/cloud-builders/gcloud'
-  env:
-  - 'TELEGRAM_API_TOKEN:$_TELEGRAM_API_TOKEN'
   args:
   - functions
   - deploy
@@ -14,4 +12,4 @@ steps:
   - --region=us-east4
   - --max-instances=1
   - --timeout=30s
-  - --env-vars-file=.env.yaml
+  - --set-env-vars="TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN"
