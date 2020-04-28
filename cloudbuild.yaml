@@ -12,4 +12,4 @@ steps:
   - --region=us-east4
   - --max-instances=1
   - --timeout=30s
-  - --set-env-vars="TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN"
+  - --set-env-vars=TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN
