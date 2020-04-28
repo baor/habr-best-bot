@@ -1,4 +1,4 @@
-module github.com/baor/habr-best-bot
+module github.com/baor/habr-best-bot/habrbestbot
 
 go 1.13
 
