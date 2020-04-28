@@ -1,5 +1,7 @@
 steps:
 - name: 'gcr.io/cloud-builders/gcloud'
+  env:
+  - 'TELEGRAM_API_TOKEN:$_TELEGRAM_API_TOKEN'
   args:
   - functions
   - deploy
