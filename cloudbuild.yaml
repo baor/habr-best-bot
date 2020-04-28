@@ -4,9 +4,9 @@ steps:
   - functions
   - deploy
   - habr-best-bot
-  - --source=habr-best/github_baor_habr-best-bot/master//
+  - --source=.
   - --trigger-event=google.pubsub.topic.publish
-  - --trigger-topic=projects/habr-best/topics/habr-best-update
+  - --trigger-topic=habr-best-update
   - --runtime=go113
   - --memory=128MB
   - --entry-point=habrbestbot.Entrypoint
