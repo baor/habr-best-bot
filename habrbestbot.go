@@ -35,14 +35,13 @@ func (c *botContext) updateFeedToChannel() {
 	}
 }
 
-// PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
-// additional information regarding Pub/Sub events.
-type PubSubMessage struct {
+// pubSubMessage is the payload of a Pub/Sub event.
+type pubSubMessage struct {
 	Data []byte `json:"data"`
 }
 
-// HelloPubSub consumes a Pub/Sub message.
-func Entrypoint(ctx context.Context, m PubSubMessage) error {
+// Entrypoint consumes a Pub/Sub message which triggers feed update.
+func Entrypoint(ctx context.Context, m pubSubMessage) error {
 	log.Println(string(m.Data))
 
 	token := os.Getenv("TELEGRAM_API_TOKEN")
@@ -51,10 +50,10 @@ func Entrypoint(ctx context.Context, m PubSubMessage) error {
 	}
 	bot := telegram.NewBot(token)
 
-	const GCS_BUCKET_NAME = "habr-best-feeds-storage-2"
-	log.Printf("GCS bucket name: %s", GCS_BUCKET_NAME)
+	const GcsBucketName = "habr-best-feeds-storage-2"
+	log.Printf("GCS bucket name: %s", GcsBucketName)
 
-	s := storage.NewGcsAdapter(GCS_BUCKET_NAME)
+	s := storage.NewGcsAdapter(GcsBucketName)
 
 	bCtx := botContext{
 		tlg:        bot,
