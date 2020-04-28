@@ -19,7 +19,7 @@ func TestHabrBestBot_updateFeedToChannel_OneItem(t *testing.T) {
 			},
 		},
 	}
-	ctx := context{
+	ctx := botContext{
 		tlg:        &bot,
 		tlgChannel: "@habrbest",
 		st:         &s,
@@ -48,7 +48,7 @@ func TestHabrBestBot_updateFeedToChannel_TwoItems(t *testing.T) {
 			},
 		},
 	}
-	ctx := context{
+	ctx := botContext{
 		tlg:        &bot,
 		tlgChannel: "@habrbest",
 		st:         &s,
@@ -78,7 +78,7 @@ func TestHabrBestBot_updateFeedToChannel_TwoSameItems(t *testing.T) {
 			},
 		},
 	}
-	ctx := context{
+	ctx := botContext{
 		tlg:        &bot,
 		tlgChannel: "@habrbest",
 		st:         &s,

@@ -1,9 +1,8 @@
 package habrbestbot
 
 import (
-	"fmt"
+	"context"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/baor/habr-best-bot/habr"
@@ -11,7 +10,7 @@ import (
 	"github.com/baor/habr-best-bot/telegram"
 )
 
-type context struct {
+type botContext struct {
 	tlg        telegram.Messenger
 	tlgChannel string
 	st         storage.PostStorer
@@ -22,7 +21,7 @@ type context struct {
 // I will leave only a to avoid tag nesting
 var telegramAllowedTags = []string{"a"}
 
-func (c *context) updateFeedToChannel() {
+func (c *botContext) updateFeedToChannel() {
 	for _, feedItem := range c.feed.GetBestFeed(telegramAllowedTags) {
 		if c.st.IsPostIDExists(feedItem.ID) {
 			continue
@@ -36,7 +35,16 @@ func (c *context) updateFeedToChannel() {
 	}
 }
 
-func Entrypoint(w http.ResponseWriter, r *http.Request) {
+// PubSubMessage is the payload of a Pub/Sub event. Please refer to the docs for
+// additional information regarding Pub/Sub events.
+type PubSubMessage struct {
+	Data []byte `json:"data"`
+}
+
+// HelloPubSub consumes a Pub/Sub message.
+func Entrypoint(ctx context.Context, m PubSubMessage) error {
+	log.Println(string(m.Data))
+
 	token := os.Getenv("TELEGRAM_API_TOKEN")
 	if token == "" {
 		log.Panic("Empty TELEGRAM_API_TOKEN")
@@ -47,13 +55,14 @@ func Entrypoint(w http.ResponseWriter, r *http.Request) {
 	log.Printf("GCS bucket name: %s", gcsBucketName)
 	s := storage.NewGcsAdapter(gcsBucketName)
 
-	ctx := context{
+	bCtx := botContext{
 		tlg:        bot,
 		tlgChannel: "@habrbest",
 		st:         s,
 		feed:       habr.NewHabrReader(),
 	}
 
-	ctx.updateFeedToChannel()
-	fmt.Fprint(w, "Feed was updated successfully")
+	bCtx.updateFeedToChannel()
+	log.Println("Feed was updated successfully")
+	return nil
 }
