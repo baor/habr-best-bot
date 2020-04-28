@@ -36,7 +36,7 @@ func (c *context) updateFeedToChannel() {
 	}
 }
 
-func entrypoint(w http.ResponseWriter, r *http.Request) {
+func Entrypoint(w http.ResponseWriter, r *http.Request) {
 	token := os.Getenv("TELEGRAM_API_TOKEN")
 	if token == "" {
 		log.Panic("Empty TELEGRAM_API_TOKEN")
@@ -46,11 +46,6 @@ func entrypoint(w http.ResponseWriter, r *http.Request) {
 	gcsBucketName := "habrfeeds"
 	log.Printf("GCS bucket name: %s", gcsBucketName)
 	s := storage.NewGcsAdapter(gcsBucketName)
-
-	port := os.Getenv("PORT")
-	if len(port) == 0 {
-		port = "8080"
-	}
 
 	ctx := context{
 		tlg:        bot,

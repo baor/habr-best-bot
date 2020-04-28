@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestTelegobot_updateFeedToChannel_OneItem(t *testing.T) {
+func TestHabrBestBot_updateFeedToChannel_OneItem(t *testing.T) {
 	bot := telegramBotMocked{}
 	s := storageMocked{internalStorage: map[string]bool{}}
 	fr := feedReaderMocked{
@@ -19,17 +19,19 @@ func TestTelegobot_updateFeedToChannel_OneItem(t *testing.T) {
 			},
 		},
 	}
-	updateFeedToChannel(context{
+	ctx := context{
 		tlg:        &bot,
 		tlgChannel: "@habrbest",
 		st:         &s,
 		feed:       fr,
-	})
+	}
+
+	ctx.updateFeedToChannel()
 	assert.Equal(t, 1, bot.newMessagesCount)
 	assert.True(t, s.internalStorage["id1"])
 }
 
-func TestTelegobot_updateFeedToChannel_TwoItems(t *testing.T) {
+func TestHabrBestBot_updateFeedToChannel_TwoItems(t *testing.T) {
 	bot := telegramBotMocked{}
 	s := storageMocked{internalStorage: map[string]bool{}}
 	fr := feedReaderMocked{
@@ -46,18 +48,20 @@ func TestTelegobot_updateFeedToChannel_TwoItems(t *testing.T) {
 			},
 		},
 	}
-	updateFeedToChannel(context{
+	ctx := context{
 		tlg:        &bot,
 		tlgChannel: "@habrbest",
 		st:         &s,
 		feed:       fr,
-	})
+	}
+
+	ctx.updateFeedToChannel()
 	assert.Equal(t, 2, bot.newMessagesCount)
 	assert.True(t, s.internalStorage["id1"])
 	assert.True(t, s.internalStorage["id2"])
 }
 
-func TestTelegobot_updateFeedToChannel_TwoSameItems(t *testing.T) {
+func TestHabrBestBot_updateFeedToChannel_TwoSameItems(t *testing.T) {
 	bot := telegramBotMocked{}
 	s := storageMocked{internalStorage: map[string]bool{}}
 	fr := feedReaderMocked{
@@ -74,12 +78,14 @@ func TestTelegobot_updateFeedToChannel_TwoSameItems(t *testing.T) {
 			},
 		},
 	}
-	updateFeedToChannel(context{
+	ctx := context{
 		tlg:        &bot,
 		tlgChannel: "@habrbest",
 		st:         &s,
 		feed:       fr,
-	})
+	}
+
+	ctx.updateFeedToChannel()
 	assert.Equal(t, 1, bot.newMessagesCount)
 	assert.True(t, s.internalStorage["id1"])
 }
