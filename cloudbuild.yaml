@@ -5,7 +5,6 @@ steps:
   - deploy
   - habr-best-bot
   - --source=.
-  - --trigger-event=google.pubsub.topic.publish
   - --trigger-topic=habr-best-update
   - --runtime=go113
   - --memory=128MB
