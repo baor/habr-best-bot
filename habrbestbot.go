@@ -51,9 +51,10 @@ func Entrypoint(ctx context.Context, m PubSubMessage) error {
 	}
 	bot := telegram.NewBot(token)
 
-	gcsBucketName := "habr-best-feeds-storage"
-	log.Printf("GCS bucket name: %s", gcsBucketName)
-	s := storage.NewGcsAdapter(gcsBucketName)
+	const GCS_BUCKET_NAME = "habr-best-feeds-storage-2"
+	log.Printf("GCS bucket name: %s", GCS_BUCKET_NAME)
+
+	s := storage.NewGcsAdapter(GCS_BUCKET_NAME)
 
 	bCtx := botContext{
 		tlg:        bot,
