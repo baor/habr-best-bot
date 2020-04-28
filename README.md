@@ -1,2 +1,5 @@
 # habr-best
-Telegram bot for habr best feed
+Bot for telegram to update habr best feed
+
+# Habr.com RSS
+https://habr.com/rss/best/
