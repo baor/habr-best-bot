@@ -1,0 +1,16 @@
+steps:
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - functions
+  - deploy
+  - habr-best-bot
+  - --source=habr-best/github_baor_habr-best-bot/master//
+  - --trigger-event=google.pubsub.topic.publish
+  - --trigger-topic=projects/habr-best/topics/habr-best-update
+  - --runtime=go113
+  - --memory=128MB
+  - --entry-point=habrbestbot.Entrypoint
+  - --region=us-east4
+  - --max-instances=1
+  - --timeout=30s
+  - --env-vars-file=.env.yaml
