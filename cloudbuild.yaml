@@ -1,15 +1,15 @@
 steps:
-- name: 'gcr.io/cloud-builders/gcloud'
-  args:
-  - functions
-  - deploy
-  - habr-best-bot
-  - --source=.
-  - --trigger-topic=habr-best-update
-  - --runtime=go113
-  - --memory=128MB
-  - --entry-point=Entrypoint
-  - --region=us-west1
-  - --max-instances=1
-  - --timeout=30s
-  - --set-env-vars=TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      - functions
+      - deploy
+      - habr-best-bot
+      - --source=.
+      - --trigger-topic=habr-best-update
+      - --runtime=go113
+      - --memory=128MB
+      - --entry-point=Entrypoint
+      - --region=us-east1
+      - --max-instances=1
+      - --timeout=30s
+      - --set-env-vars=TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN
