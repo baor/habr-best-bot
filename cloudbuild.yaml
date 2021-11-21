@@ -9,7 +9,7 @@ steps:
   - --runtime=go113
   - --memory=128MB
   - --entry-point=Entrypoint
-  - --region=us-east1
+  - --region=us-central1
   - --max-instances=1
   - --timeout=30s
   - --set-env-vars=TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN
