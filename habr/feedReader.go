@@ -93,9 +93,11 @@ func NewHabrReader() FeedReader {
 
 func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
 	fp := gofeed.NewParser()
-	feed, _ := fp.ParseURL("https://habr.com/rss/best/")
 
-	log.Printf("Pull RSS feed. Description %s, Published: %s", feed.Description, feed.Published)
+	log.Printf("Pull RSS feed")
+	feed, _ := fp.ParseURL("https://habr.com/ru/rss/best/")
+	log.Printf("RSS feed is pulled. Description %s, Published: %s", feed.Description, feed.Published)
+
 	var response []FeedItem
 	for _, item := range feed.Items {
 		linkToImage := getFirstImageLink(item.Description)
