@@ -125,3 +125,10 @@ func TestGetPostID(t *testing.T) {
 	outputActual := getPostID(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
+
+// func TestManual(t *testing.T) {
+// 	var telegramAllowedTags = []string{"a"}
+// 	c := NewHabrReader()
+// 	feeds := c.GetBestFeed(telegramAllowedTags)
+// 	assert.Greater(t, 1, len(feeds))
+// }

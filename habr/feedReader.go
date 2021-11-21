@@ -2,7 +2,9 @@ package habr
 
 import (
 	"log"
+	"net/http"
 	"regexp"
+	"time"
 
 	"github.com/mmcdole/gofeed"
 )
@@ -92,13 +94,25 @@ func NewHabrReader() FeedReader {
 }
 
 func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
+	var response []FeedItem
+
+	httpClient := http.Client{
+		Timeout: 10 * time.Second,
+	}
 	fp := gofeed.NewParser()
 
 	log.Printf("Pull RSS feed")
-	feed, _ := fp.ParseURL("https://habr.com/ru/rss/best/")
+	resp, err := httpClient.Get("https://habr.com/ru/rss/best/")
+	if err != nil {
+		log.Println("Error requesting habr RSS:", err.Error())
+		return response
+	}
+	defer resp.Body.Close()
+
+	log.Printf("Parse RSS feed")
+	feed, _ := fp.Parse(resp.Body)
 	log.Printf("RSS feed is pulled. Description %s, Published: %s", feed.Description, feed.Published)
 
-	var response []FeedItem
 	for _, item := range feed.Items {
 		linkToImage := getFirstImageLink(item.Description)
 		msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n"
