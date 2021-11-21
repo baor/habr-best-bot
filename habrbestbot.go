@@ -50,10 +50,19 @@ func Entrypoint(ctx context.Context, m pubSubMessage) error {
 	}
 	bot := telegram.NewBot(token)
 
-	const GcsBucketName = "habr-best-feeds-storage-2"
-	log.Printf("GCS bucket name: %s", GcsBucketName)
+	// const GcsBucketName = "habr-best-feeds-storage-2"
+	// log.Printf("GCS bucket name: %s", GcsBucketName)
+	// s := storage.NewGcsAdapter(GcsBucketName)
 
-	s := storage.NewGcsAdapter(GcsBucketName)
+	FIRESTORE_CLOUD_PROJECT := os.Getenv("FIRESTORE_CLOUD_PROJECT")
+	if FIRESTORE_CLOUD_PROJECT == "" {
+		log.Panic("Empty FIRESTORE_CLOUD_PROJECT")
+	}
+	FIRESTORE_COLLECTION_NAME := os.Getenv("FIRESTORE_COLLECTION_NAME")
+	if FIRESTORE_COLLECTION_NAME == "" {
+		log.Panic("Empty FIRESTORE_COLLECTION_NAME")
+	}
+	s := storage.NewFirestoreAdapter(FIRESTORE_COLLECTION_NAME, FIRESTORE_CLOUD_PROJECT)
 
 	bCtx := botContext{
 		tlg:        bot,
