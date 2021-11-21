@@ -102,10 +102,16 @@ func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
 	fp := gofeed.NewParser()
 
 	log.Printf("Pull RSS feed")
-	resp, err := httpClient.Get("https://habr.com/ru/rss/best/")
+	req, err := http.NewRequest("GET", "https://habr.com/ru/rss/best/", nil)
 	if err != nil {
-		log.Println("Error requesting habr RSS:", err.Error())
-		return response
+		log.Fatalln("Error creating request object to habr RSS")
+	}
+	req.Header.Set("User-Agent", "curl/7.64.0")
+	req.Header.Set("Accept", "*/*")
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		log.Fatalln("Error requesting habr RSS:", err.Error())
 	}
 	defer resp.Body.Close()
 
