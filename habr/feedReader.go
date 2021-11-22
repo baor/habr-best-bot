@@ -106,7 +106,7 @@ func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
 	if err != nil {
 		log.Fatalln("Error creating request object to habr RSS")
 	}
-	req.Header.Set("User-Agent", "curl/7.64.0")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36")
 	req.Header.Set("Accept", "*/*")
 
 	resp, err := httpClient.Do(req)
