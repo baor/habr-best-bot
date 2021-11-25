@@ -6,16 +6,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-type updateMessage struct {
-	Text   string
-	ChatID int64
-}
-
-type updatesChannel <-chan updateMessage
-
 type Bot struct {
-	botAPI  *tgbotapi.BotAPI
-	updates updatesChannel
+	botAPI *tgbotapi.BotAPI
 }
 
 // NewBot returns an instance of Bot which implements Messenger interface
@@ -32,29 +24,14 @@ func NewBot(token string) Messenger {
 	return &b
 }
 
-func (b *Bot) NewMessageToChat(chatID int64, text string) error {
-	if len(text) > 4096 {
-		log.Printf("trim too long string %s", text)
-		text = text[:4090] + "..."
-	}
-	msg := tgbotapi.NewMessage(chatID, text)
-	msg.ParseMode = "HTML"
-	log.Println(msg)
-	_, err := b.botAPI.Send(msg)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (b *Bot) NewMessageToChannel(username string, text string) error {
-	if len(text) > 4096 {
+	MAX_LENGTH := 4090
+	if len(text) > MAX_LENGTH {
 		log.Printf("trim too long string %s", text)
-		text = text[:4090] + "..."
+		text = text[:MAX_LENGTH] + "..."
 	}
 	msg := tgbotapi.NewMessageToChannel(username, text)
 	msg.ParseMode = "HTML"
-	log.Println(msg)
 	_, err := b.botAPI.Send(msg)
 	if err != nil {
 		return err

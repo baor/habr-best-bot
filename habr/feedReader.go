@@ -20,7 +20,6 @@ type FeedReader interface {
 }
 
 type FeedItem struct {
-	LinkToImage string
 	Message     string
 	ID          string
 }
@@ -96,13 +95,11 @@ func NewHabrReader() FeedReader {
 }
 
 func processItem(item *gofeed.Item) FeedItem {
-	linkToImage := getFirstImageLink(item.Description)
 	msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n"
 	msg += stripTags(item.Description)
 	postID := getPostID(item.Link)
 
 	return FeedItem{
-		LinkToImage: linkToImage,
 		Message:     msg,
 		ID:          postID}
 }
@@ -152,7 +149,7 @@ func (HabrReader) GetBestFeed() []FeedItem {
 		log.Printf("Feed response: %s", body)
 		log.Fatalln("Error parsing RSS feed:", err.Error())
 	}
-	log.Printf("RSS feed is pulled. Description %s, Published: %s", feed.Description, feed.Published)
+	log.Printf("RSS feed is pulled. Published: %s, Number of items: %d", feed.Published, len(feed.Items))
 
 	for _, item := range feed.Items {
 		response = append(response, processItem(item))

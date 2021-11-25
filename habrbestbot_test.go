@@ -13,9 +13,8 @@ func TestHabrBestBot_updateFeedToChannel_OneItem(t *testing.T) {
 	fr := feedReaderMocked{
 		items: []habr.FeedItem{
 			{
-				LinkToImage: "http://",
-				Message:     "text",
-				ID:          "id1",
+				Message: "text",
+				ID:      "id1",
 			},
 		},
 	}
@@ -37,14 +36,12 @@ func TestHabrBestBot_updateFeedToChannel_TwoItems(t *testing.T) {
 	fr := feedReaderMocked{
 		items: []habr.FeedItem{
 			{
-				LinkToImage: "http://",
-				Message:     "text",
-				ID:          "id1",
+				Message: "text",
+				ID:      "id1",
 			},
 			{
-				LinkToImage: "http://",
-				Message:     "text",
-				ID:          "id2",
+				Message: "text",
+				ID:      "id2",
 			},
 		},
 	}
@@ -67,14 +64,12 @@ func TestHabrBestBot_updateFeedToChannel_TwoSameItems(t *testing.T) {
 	fr := feedReaderMocked{
 		items: []habr.FeedItem{
 			{
-				LinkToImage: "http://",
-				Message:     "text",
-				ID:          "id1",
+				Message: "text",
+				ID:      "id1",
 			},
 			{
-				LinkToImage: "http://",
-				Message:     "text",
-				ID:          "id1",
+				Message: "text",
+				ID:      "id1",
 			},
 		},
 	}
@@ -92,11 +87,6 @@ func TestHabrBestBot_updateFeedToChannel_TwoSameItems(t *testing.T) {
 
 type telegramBotMocked struct {
 	newMessagesCount int
-}
-
-func (t *telegramBotMocked) NewMessageToChat(chatID int64, text string) error {
-	t.newMessagesCount++
-	return nil
 }
 
 func (t *telegramBotMocked) NewMessageToChannel(username string, text string) error {
