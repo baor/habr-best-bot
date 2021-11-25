@@ -49,9 +49,7 @@ func stripTags(textWithTags string) (string, error) {
 				log.Println("Error html tokenizer token", tokenizer.Err().Error())
 				return "", tokenizer.Err()
 			}
-			res := b.String()
-			log.Println(res)
-			return res, nil
+			return b.String(), nil
 		case html.TextToken:
 			if isInAToken {
 				_, _ = b.Write(tokenizer.Raw())
@@ -150,13 +148,16 @@ func (HabrReader) GetBestFeed() []FeedItem {
 	}
 	log.Printf("RSS feed is pulled. Published: %s, Number of items: %d", feed.Published, len(feed.Items))
 
+	nSuccessfullyProcessedItems := 0
 	for _, item := range feed.Items {
 		processedItem, err := processItem(item)
 		if err != nil {
 			log.Println("Error processing feed item:", err.Error())
 			continue
 		}
+		nSuccessfullyProcessedItems++
 		processedFeed = append(processedFeed, processedItem)
 	}
+	log.Printf("RSS feed is processed. Number of successfully processed items: %d", nSuccessfullyProcessedItems)
 	return processedFeed
 }
