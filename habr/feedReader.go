@@ -36,7 +36,7 @@ func getPostID(link string) string {
 	return match[0][1]
 }
 
-func stripTags(textWithTags string) string {
+func stripTags(textWithTags string) (string, error) {
 	tokenizer := html.NewTokenizer(strings.NewReader(textWithTags))
 
 	var b bytes.Buffer
@@ -47,11 +47,12 @@ func stripTags(textWithTags string) string {
 		switch tt {
 		case html.ErrorToken:
 			if tokenizer.Err() != io.EOF {
-				log.Fatalln("Error html tokenizer token", tokenizer.Err().Error())
+				log.Println("Error html tokenizer token", tokenizer.Err().Error())
+				return "", tokenizer.Err()
 			}
 			res := b.String()
 			log.Println(res)
-			return res
+			return res, nil
 		case html.TextToken:
 			if isInImgToken {
 				continue
@@ -105,18 +106,21 @@ func NewHabrReader() FeedReader {
 	return &HabrReader{}
 }
 
-func processItem(item *gofeed.Item) FeedItem {
-	msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n"
-	msg += stripTags(item.Description)
+func processItem(item *gofeed.Item) (FeedItem, error) {
+	body, err := stripTags(item.Description)
+	if err != nil {
+		return FeedItem{}, err
+	}
+	msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n" + body
 	postID := getPostID(item.Link)
 
 	return FeedItem{
 		Message: msg,
-		ID:      postID}
+		ID:      postID}, nil
 }
 
 func (HabrReader) GetBestFeed() []FeedItem {
-	var response []FeedItem
+	var processedFeed []FeedItem
 
 	httpClient := http.Client{
 		Timeout: 10 * time.Second,
@@ -163,7 +167,12 @@ func (HabrReader) GetBestFeed() []FeedItem {
 	log.Printf("RSS feed is pulled. Published: %s, Number of items: %d", feed.Published, len(feed.Items))
 
 	for _, item := range feed.Items {
-		response = append(response, processItem(item))
+		processedItem, err := processItem(item)
+		if err != nil {
+			log.Println("Error processing feed item:", err.Error())
+			continue
+		}
+		processedFeed = append(processedFeed, processedItem)
 	}
-	return response
+	return processedFeed
 }
