@@ -42,8 +42,5 @@ func (s *GcsAdapter) AddPostID(id string) {
 // and checks if object with name id exists
 func (s *GcsAdapter) IsPostIDExists(id string) bool {
 	_, err := s.bucketHandle.Object(id).NewReader(context.Background())
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
