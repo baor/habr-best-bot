@@ -20,21 +20,8 @@ type FeedReader interface {
 }
 
 type FeedItem struct {
-	Message     string
-	ID          string
-}
-
-func getFirstImageLink(textWithTags string) string {
-	r1 := regexp.MustCompile(`(?s)<img\s*src="([^"]*)"`)
-	match := r1.FindAllStringSubmatch(textWithTags, -1)
-	if len(match) == 0 {
-		return ""
-	}
-	if len(match[0]) < 2 {
-		return ""
-	}
-	imageLink := match[0][1]
-	return imageLink
+	Message string
+	ID      string
 }
 
 func getPostID(link string) string {
@@ -49,43 +36,67 @@ func getPostID(link string) string {
 	return match[0][1]
 }
 
-func traverse(n *html.Node, b *bytes.Buffer) {
-	if n.Type == html.ElementNode {
-		switch n.Data {
-		case "html":
-		case "head":
-		case "body":
-		case "a":
-			err := html.Render(b, n)
-			if err != nil {
-				log.Fatalln("Error rendering the node", err.Error())
-			}
-			return
-		default:
-			_, _ = b.WriteString(" ")
-		}
-	}
-
-	if n.Type == html.TextNode {
-		_, _ = b.WriteString(n.Data)
-	}
-
-	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		traverse(c, b)
-	}
-}
-
 func stripTags(textWithTags string) string {
-	parsedHtmlDescription, err := html.Parse(strings.NewReader(textWithTags))
-	if err != nil {
-		log.Fatalln("Error parsing body as HTML :", textWithTags)
-	}
+	tokenizer := html.NewTokenizer(strings.NewReader(textWithTags))
 
 	var b bytes.Buffer
-	traverse(parsedHtmlDescription, &b)
-	res := b.String()
-	log.Println(res)
-	return res
+	isInImgToken := false
+	isInAToken := false
+	for {
+		tt := tokenizer.Next()
+		switch tt {
+		case html.ErrorToken:
+			if tokenizer.Err() != io.EOF {
+				log.Fatalln("Error html tokenizer token", tokenizer.Err().Error())
+			}
+			res := b.String()
+			log.Println(res)
+			return res
+		case html.TextToken:
+			if isInImgToken {
+				continue
+			}
+
+			if isInAToken {
+				_, _ = b.Write(tokenizer.Raw())
+				continue
+			}
+			_, _ = b.Write(tokenizer.Text())
+		case html.StartTagToken, html.SelfClosingTagToken:
+			if isInImgToken {
+				continue
+			}
+			tn, _ := tokenizer.TagName()
+			switch string(tn) {
+			case "img":
+				_, _ = b.WriteString(" ")
+				if tt != html.SelfClosingTagToken {
+					isInImgToken = true
+				}
+				continue
+			case "a":
+				if tt != html.SelfClosingTagToken {
+					isInAToken = true
+				}
+				_, _ = b.Write(tokenizer.Raw())
+				continue
+			default:
+				_, _ = b.WriteString(" ")
+			}
+
+		case html.EndTagToken:
+			tn, _ := tokenizer.TagName()
+			switch string(tn) {
+			case "img":
+				isInImgToken = false
+				continue
+			case "a":
+				_, _ = b.Write(tokenizer.Raw())
+				isInAToken = false
+				continue
+			}
+		}
+	}
 }
 
 type HabrReader struct{}
@@ -100,8 +111,8 @@ func processItem(item *gofeed.Item) FeedItem {
 	postID := getPostID(item.Link)
 
 	return FeedItem{
-		Message:     msg,
-		ID:          postID}
+		Message: msg,
+		ID:      postID}
 }
 
 func (HabrReader) GetBestFeed() []FeedItem {

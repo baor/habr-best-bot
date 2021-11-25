@@ -47,16 +47,16 @@ func TestStripTag_ATagOneByOne(t *testing.T) {
 	assert.Equal(t, outputExpected, outputActual)
 }
 
-func TestStripTag_ImgTag(t *testing.T) {
-	input := `<img>text`
-	outputExpected := " text"
+func TestStripTag_ImgTag_Ignore(t *testing.T) {
+	input := `<img>text</img>`
+	outputExpected := " "
 	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
-func TestStripTag_ImgTagWithArgs(t *testing.T) {
-	input := `<img src="" size="">text`
-	outputExpected := " text"
+func TestStripTag_ImgTagWithArgs_Ignore(t *testing.T) {
+	input := `<img src="" size="">text</img>`
+	outputExpected := " "
 	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
@@ -65,27 +65,6 @@ func TestStripTags_AllowedTags(t *testing.T) {
 	input := `<a>text1</a> text2 <z>text3</z>`
 	outputExpected := "<a>text1</a> text2  text3"
 	outputActual := stripTags(input)
-	assert.Equal(t, outputExpected, outputActual)
-}
-
-func TestGetFirstImageLink_NoLink(t *testing.T) {
-	input := `notags`
-	outputExpected := ""
-	outputActual := getFirstImageLink(input)
-	assert.Equal(t, outputExpected, outputActual)
-}
-
-func TestGetFirstImageLink_WithArgs(t *testing.T) {
-	input := `<img src="https://site/pic.png" alt="image" width="300">`
-	outputExpected := "https://site/pic.png"
-	outputActual := getFirstImageLink(input)
-	assert.Equal(t, outputExpected, outputActual)
-}
-
-func TestGetFirstImageLink_FirstLink(t *testing.T) {
-	input := `<img src="https://site/pic1.png"> <img src="https://site/pic2.png">`
-	outputExpected := "https://site/pic1.png"
-	outputActual := getFirstImageLink(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
