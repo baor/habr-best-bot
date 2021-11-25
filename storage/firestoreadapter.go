@@ -26,7 +26,7 @@ func NewFirestoreAdapter(collectionName string, projectName string) PostStorer {
 
 // AddPostID creates a new empty file. Name of the file is an id
 func (fa *FirestoreAdapter) AddPostID(id string) {
-	_, err := fa.firestoreCollection.Doc(id).Set(context.Background(), map[int]bool{1: true})
+	_, err := fa.firestoreCollection.Doc(id).Set(context.Background(), map[string]bool{"1": true})
 	if err != nil {
 		log.Panic(err)
 	}
