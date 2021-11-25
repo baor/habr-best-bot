@@ -119,6 +119,6 @@ type feedReaderMocked struct {
 	items []habr.FeedItem
 }
 
-func (fr feedReaderMocked) GetBestFeed(allowedTags []string) []habr.FeedItem {
+func (fr feedReaderMocked) GetBestFeed() []habr.FeedItem {
 	return fr.items
 }

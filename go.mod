@@ -12,4 +12,5 @@ require (
 	github.com/mmcdole/goxpp v0.0.0-20181012175147-0068e33feabf // indirect
 	github.com/stretchr/testify v1.6.1
 	github.com/technoweenie/multipartstreamer v1.0.1 // indirect
+	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 )

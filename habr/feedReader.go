@@ -1,47 +1,28 @@
 package habr
 
 import (
+	"bytes"
 	"compress/gzip"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/mmcdole/gofeed"
+	"golang.org/x/net/html"
 )
 
 type FeedReader interface {
-	GetBestFeed(allowedTags []string) []FeedItem
+	GetBestFeed() []FeedItem
 }
 
 type FeedItem struct {
 	LinkToImage string
 	Message     string
 	ID          string
-}
-
-func stripTag(textWithTags string, tagNameToRemove string) string {
-	r1 := regexp.MustCompile(`(?s)(<` + tagNameToRemove + `[^>]*>)`)
-	strippedText := r1.ReplaceAllString(textWithTags, " ")
-
-	r2 := regexp.MustCompile(`(?s)(</` + tagNameToRemove + `[^>]*>)`)
-	strippedText = r2.ReplaceAllString(strippedText, " ")
-
-	return strippedText
-}
-
-func getAllTags(textWithTags string) []string {
-	var tags []string
-	r1 := regexp.MustCompile(`(?s)<([^\s>/]*)`)
-	match := r1.FindAllStringSubmatch(textWithTags, -1)
-	for _, val := range match {
-		if val[1] != "" {
-			tags = append(tags, val[1])
-		}
-	}
-	return tags
 }
 
 func getFirstImageLink(textWithTags string) string {
@@ -69,25 +50,43 @@ func getPostID(link string) string {
 	return match[0][1]
 }
 
-func isTagAllowed(tag string, allowedTags []string) bool {
-	for _, allowedTag := range allowedTags {
-		if tag == allowedTag {
-			return true
+func traverse(n *html.Node, b *bytes.Buffer) {
+	if n.Type == html.ElementNode {
+		switch n.Data {
+		case "html":
+		case "head":
+		case "body":
+		case "a":
+			err := html.Render(b, n)
+			if err != nil {
+				log.Fatalln("Error rendering the node", err.Error())
+			}
+			return
+		default:
+			_, _ = b.WriteString(" ")
 		}
 	}
-	return false
+
+	if n.Type == html.TextNode {
+		_, _ = b.WriteString(n.Data)
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		traverse(c, b)
+	}
 }
 
-func stripTags(textWithTags string, allowedTags []string) string {
-	allTags := getAllTags(textWithTags)
-	strippedString := textWithTags
-	for _, tag := range allTags {
-		if isTagAllowed(tag, allowedTags) {
-			continue
-		}
-		strippedString = stripTag(strippedString, tag)
+func stripTags(textWithTags string) string {
+	parsedHtmlDescription, err := html.Parse(strings.NewReader(textWithTags))
+	if err != nil {
+		log.Fatalln("Error parsing body as HTML :", textWithTags)
 	}
-	return strippedString
+
+	var b bytes.Buffer
+	traverse(parsedHtmlDescription, &b)
+	res := b.String()
+	log.Println(res)
+	return res
 }
 
 type HabrReader struct{}
@@ -96,7 +95,19 @@ func NewHabrReader() FeedReader {
 	return &HabrReader{}
 }
 
-func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
+func processItem(item *gofeed.Item) FeedItem {
+	linkToImage := getFirstImageLink(item.Description)
+	msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n"
+	msg += stripTags(item.Description)
+	postID := getPostID(item.Link)
+
+	return FeedItem{
+		LinkToImage: linkToImage,
+		Message:     msg,
+		ID:          postID}
+}
+
+func (HabrReader) GetBestFeed() []FeedItem {
 	var response []FeedItem
 
 	httpClient := http.Client{
@@ -144,14 +155,7 @@ func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
 	log.Printf("RSS feed is pulled. Description %s, Published: %s", feed.Description, feed.Published)
 
 	for _, item := range feed.Items {
-		linkToImage := getFirstImageLink(item.Description)
-		msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n"
-		msg += stripTags(item.Description, allowedTags)
-		postID := getPostID(item.Link)
-		response = append(response, FeedItem{
-			LinkToImage: linkToImage,
-			Message:     msg,
-			ID:          postID})
+		response = append(response, processItem(item))
 	}
 	return response
 }

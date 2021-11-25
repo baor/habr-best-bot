@@ -17,12 +17,8 @@ type botContext struct {
 	feed       habr.FeedReader
 }
 
-// full list of allowed tags []string{"a", "b", "strong", "i", "em", "code", "pre"}
-// I will leave only a to avoid tag nesting
-var telegramAllowedTags = []string{"a"}
-
 func (c *botContext) updateFeedToChannel() {
-	for _, feedItem := range c.feed.GetBestFeed(telegramAllowedTags) {
+	for _, feedItem := range c.feed.GetBestFeed() {
 		if c.st.IsPostIDExists(feedItem.ID) {
 			continue
 		}

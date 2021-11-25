@@ -6,95 +6,65 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStripTag_EmptyTag_SameString(t *testing.T) {
-	input := `notags`
-	outputExpected := input
-	outputActual := stripTag(input, "")
-	assert.Equal(t, outputExpected, outputActual)
-}
-
 func TestStripTag_BrTag_NoTags(t *testing.T) {
 	input := `notags`
 	outputExpected := input
-	outputActual := stripTag(input, "br")
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
 func TestStripTag_BrTag(t *testing.T) {
 	input := `<br>text<br>`
 	outputExpected := " text "
-	outputActual := stripTag(input, "br")
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 func TestStripTag_BrTag2(t *testing.T) {
 	input := `<br/>text<br/>`
 	outputExpected := " text "
-	outputActual := stripTag(input, "br")
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
 func TestStripTag_ATag(t *testing.T) {
-	input := `<a>text</a>`
-	outputExpected := " text "
-	outputActual := stripTag(input, "a")
-	assert.Equal(t, outputExpected, outputActual)
-}
-
-func TestStripTag_NestedATagWithArgs(t *testing.T) {
-	input := `<b><a arg="aaa">text</a></b>`
-	outputExpected := "<b> text </b>"
-	outputActual := stripTag(input, "a")
-	assert.Equal(t, outputExpected, outputActual)
-}
-
-func TestStripTag_NestedATagWithArgsAndText(t *testing.T) {
-	input := `<b>text1 <a arg="aaa">text2</a> text3</b>`
-	outputExpected := "<b>text1  text2  text3</b>"
-	outputActual := stripTag(input, "a")
+	input := `<b>text</b>`
+	outputExpected := " text"
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
 func TestStripTag_NestedBTagWithArgsAndText(t *testing.T) {
 	input := `<b>text1 <a arg="aaa">text2</a> text3</b>`
-	outputExpected := ` text1 <a arg="aaa">text2</a> text3 `
-	outputActual := stripTag(input, "b")
+	outputExpected := ` text1 <a arg="aaa">text2</a> text3`
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
 func TestStripTag_ATagOneByOne(t *testing.T) {
-	input := `<a>text1</a> text2 <a>text3</a>`
-	outputExpected := ` text1  text2  text3 `
-	outputActual := stripTag(input, "a")
+	input := `<b>text1</b> text2 <b>text3</b>`
+	outputExpected := ` text1 text2  text3`
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
 func TestStripTag_ImgTag(t *testing.T) {
 	input := `<img>text`
 	outputExpected := " text"
-	outputActual := stripTag(input, "img")
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
 func TestStripTag_ImgTagWithArgs(t *testing.T) {
 	input := `<img src="" size="">text`
 	outputExpected := " text"
-	outputActual := stripTag(input, "img")
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
-
-var telegramAllowedTags = []string{"a"}
 
 func TestStripTags_AllowedTags(t *testing.T) {
 	input := `<a>text1</a> text2 <z>text3</z>`
-	outputExpected := "<a>text1</a> text2  text3 "
-	outputActual := stripTags(input, telegramAllowedTags)
-	assert.Equal(t, outputExpected, outputActual)
-}
-
-func TestGetAllTags(t *testing.T) {
-	input := `<br><b>text1 <a arg="aaa">text2</a> text3</b><img>`
-	outputExpected := []string{"br", "b", "a", "img"}
-	outputActual := getAllTags(input)
+	outputExpected := "<a>text1</a> text2  text3"
+	outputActual := stripTags(input)
 	assert.Equal(t, outputExpected, outputActual)
 }
 
@@ -126,9 +96,15 @@ func TestGetPostID(t *testing.T) {
 	assert.Equal(t, outputExpected, outputActual)
 }
 
-func TestManual(t *testing.T) {
-	var telegramAllowedTags = []string{"a"}
-	c := NewHabrReader()
-	feeds := c.GetBestFeed(telegramAllowedTags)
-	assert.Greater(t, len(feeds), 1)
+func TestStripTags_UrlDecode(t *testing.T) {
+	input := `<p>ого <a href="https://audio-v-text.silero.ai/a%3BRedis%3BRocksDB"> text </a> Читать дальше &rarr; ого —&nbsp;ого</p>`
+	outputActual := stripTags(input)
+	outputExpected := " ого <a href=\"https://audio-v-text.silero.ai/a%3BRedis%3BRocksDB\"> text </a> Читать дальше → ого —\u00a0ого"
+	assert.Equal(t, outputExpected, outputActual)
 }
+
+// func TestManual(t *testing.T) {
+// 	c := NewHabrReader()
+// 	feeds := c.GetBestFeed()
+// 	assert.Greater(t, len(feeds), 1)
+// }
