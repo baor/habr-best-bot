@@ -40,7 +40,6 @@ func stripTags(textWithTags string) (string, error) {
 	tokenizer := html.NewTokenizer(strings.NewReader(textWithTags))
 
 	var b bytes.Buffer
-	isInImgToken := false
 	isInAToken := false
 	for {
 		tt := tokenizer.Next()
@@ -54,31 +53,19 @@ func stripTags(textWithTags string) (string, error) {
 			log.Println(res)
 			return res, nil
 		case html.TextToken:
-			if isInImgToken {
-				continue
-			}
-
 			if isInAToken {
 				_, _ = b.Write(tokenizer.Raw())
 				continue
 			}
 			_, _ = b.Write(tokenizer.Text())
 		case html.StartTagToken, html.SelfClosingTagToken:
-			if isInImgToken {
-				continue
-			}
 			tn, _ := tokenizer.TagName()
 			switch string(tn) {
 			case "img":
 				_, _ = b.WriteString(" ")
-				if tt != html.SelfClosingTagToken {
-					isInImgToken = true
-				}
 				continue
 			case "a":
-				if tt != html.SelfClosingTagToken {
-					isInAToken = true
-				}
+				isInAToken = true
 				_, _ = b.Write(tokenizer.Raw())
 				continue
 			default:
@@ -88,9 +75,6 @@ func stripTags(textWithTags string) (string, error) {
 		case html.EndTagToken:
 			tn, _ := tokenizer.TagName()
 			switch string(tn) {
-			case "img":
-				isInImgToken = false
-				continue
 			case "a":
 				_, _ = b.Write(tokenizer.Raw())
 				isInAToken = false
