@@ -1,6 +1,9 @@
 package habr
 
 import (
+	"compress/gzip"
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"regexp"
@@ -106,17 +109,38 @@ func (HabrReader) GetBestFeed(allowedTags []string) []FeedItem {
 	if err != nil {
 		log.Fatalln("Error creating request object to habr RSS")
 	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36")
-	req.Header.Set("Accept", "*/*")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36")
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Cache-Control", "max-age=0")
+	req.Header.Set("Cookie", "habr_web_home=ARTICLES_LIST_TOP; hl=ru; fl=ru")
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		log.Fatalln("Error requesting habr RSS:", err.Error())
+		log.Fatalln("Error requesting habr RSS. ", err.Error())
 	}
 	defer resp.Body.Close()
 
+	var reader io.ReadCloser
+	switch resp.Header.Get("Content-Encoding") {
+	case "gzip":
+		reader, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			log.Fatalln("Error decoding gzip body. ", err.Error())
+		}
+		defer reader.Close()
+	default:
+		reader = resp.Body
+	}
+
 	log.Printf("Parse RSS feed")
-	feed, _ := fp.Parse(resp.Body)
+	feed, err := fp.Parse(reader)
+	if err != nil {
+		body, _ := ioutil.ReadAll(reader)
+		log.Printf("Feed response: %s", body)
+		log.Fatalln("Error parsing RSS feed:", err.Error())
+	}
 	log.Printf("RSS feed is pulled. Description %s, Published: %s", feed.Description, feed.Published)
 
 	for _, item := range feed.Items {
