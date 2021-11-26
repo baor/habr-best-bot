@@ -15,5 +15,4 @@ steps:
       - --set-env-vars=TELEGRAM_API_TOKEN=$_TELEGRAM_API_TOKEN
       - --set-env-vars=FIRESTORE_CLOUD_PROJECT=$_FIRESTORE_CLOUD_PROJECT
       - --set-env-vars=FIRESTORE_COLLECTION_NAME=$_FIRESTORE_COLLECTION_NAME
-      
-
+      - --set-env-vars=GCS_BUCKET_NAME=$_GCS_BUCKET_NAME
