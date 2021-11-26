@@ -52,7 +52,7 @@ func stripTags(textWithTags string) (string, error) {
 			return b.String(), nil
 		case html.TextToken:
 			if isInAToken {
-				_, _ = b.Write(tokenizer.Raw())
+				_, _ = b.Write(tokenizer.Text())
 				continue
 			}
 			_, _ = b.Write(tokenizer.Text())

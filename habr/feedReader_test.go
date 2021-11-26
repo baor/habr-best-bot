@@ -33,6 +33,8 @@ func TestStripTags_PositiveCases(t *testing.T) {
 			expectedOutput: " ого <a href=\"https://audio-v-text.silero.ai/a%3BRedis%3BRocksDB\"> text </a> Читать дальше → ого —\u00a0ого"},
 		{input: `<img src="https://habrastorage.org/webt/xa/j5/jm/xaj5jmbdokbljvrnijpts6xlkoi.jpeg">WWW!`,
 			expectedOutput: ` WWW!`},
+		{input: `<a href="https://habr.com/ru/post/591219/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=591219#habracut">Читать дальше &rarr;</a>`,
+			expectedOutput: `<a href="https://habr.com/ru/post/591219/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=591219#habracut">Читать дальше →</a>`},
 	}
 
 	for _, tc := range tests {
