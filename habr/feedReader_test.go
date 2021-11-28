@@ -3,10 +3,11 @@ package habr
 import (
 	"testing"
 
+	"github.com/mmcdole/gofeed"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStripTags_PositiveCases(t *testing.T) {
+func Test_StripTags_PositiveCases(t *testing.T) {
 	tests := []struct {
 		input          string
 		expectedOutput string
@@ -44,11 +45,23 @@ func TestStripTags_PositiveCases(t *testing.T) {
 	}
 }
 
-func TestGetPostID(t *testing.T) {
+func Test_GetPostID(t *testing.T) {
 	input := `https://habr.com/post/413925/?utm_source=habrahabr&utm_medium=rss&utm_campaign=413925`
 	outputExpected := "413925"
 	outputActual := getPostID(input)
 	assert.Equal(t, outputExpected, outputActual)
+}
+
+func Test_ProcessItem(t *testing.T) {
+	item := gofeed.Item{
+		Title:       "стекло &amp; пиксел",
+		Description: "description",
+		Link:        "http://habr.com/post/1/",
+	}
+	feedItem, err := processItem(&item)
+	assert.Nil(t, err)
+	assert.Equal(t, "1", feedItem.ID)
+	assert.Equal(t, `<a href="http://habr.com/post/1/">`+"стекло & пиксел"+`</a>`+"\ndescription", feedItem.Message)
 }
 
 // func TestManual(t *testing.T) {

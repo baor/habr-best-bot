@@ -81,7 +81,7 @@ func processItem(item *gofeed.Item) (FeedItem, error) {
 	if err != nil {
 		return FeedItem{}, err
 	}
-	msg := "<a href=\"" + item.Link + "\">" + item.Title + "</a>\n" + body
+	msg := "<a href=\"" + item.Link + "\">" + html.UnescapeString(item.Title) + "</a>\n" + body
 	postID := getPostID(item.Link)
 
 	return FeedItem{
